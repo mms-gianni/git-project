@@ -8,7 +8,7 @@ import (
 func cmdShow() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output) {
 		out.Printf("a long list.\n")
-		githubcommands.GetProject(c.Option("githubtoken").String())
+		githubcommands.GetItems(c.Option("githubtoken").String())
 	}
 
 	return clif.NewCommand("ls", "List all Todo", cb).
