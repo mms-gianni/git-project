@@ -14,10 +14,6 @@ import (
 
 var ctx = context.Background()
 
-func init() {
-	fmt.Println("This will get called on main initialization")
-}
-
 func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
 
 	ts := oauth2.StaticTokenSource(

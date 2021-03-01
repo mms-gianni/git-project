@@ -7,7 +7,7 @@ import (
 	"gopkg.in/ukautz/clif.v1"
 )
 
-func cmdCreatelist() *clif.Command {
+func cmdCreate() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output, in clif.Input) {
 		out.Printf("Create a new list\n")
 
@@ -16,12 +16,20 @@ func cmdCreatelist() *clif.Command {
 		if repo == nil {
 			githubcommands.CreatePersonalList(c, in)
 		} else {
-			githubcommands.CreateRepoProject(c, in, repo)
+			space := in.Choose("This directory seems to be a repo. In which space do you want to create the repo?", map[string]string{
+				"1": "Personal",
+				"2": "Repo",
+			})
+			if space == "1" {
+				githubcommands.CreatePersonalList(c, in)
+			} else {
+				githubcommands.CreateRepoProject(c, in, repo)
+			}
 		}
 
 	}
 
-	return clif.NewCommand("createlist", "Add a new todo list", cb).
+	return clif.NewCommand("create", "Add a new todo list", cb).
 		NewArgument("name", "Name of the new Project", "", false, false).
 		NewArgument("repo", "create in repo", "", false, false).
 		NewOption("description", "d", "Description", "", false, false).
@@ -29,5 +37,5 @@ func cmdCreatelist() *clif.Command {
 }
 
 func init() {
-	Commands = append(Commands, cmdCreatelist)
+	Commands = append(Commands, cmdCreate)
 }
