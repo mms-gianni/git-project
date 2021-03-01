@@ -5,7 +5,7 @@ import (
 	"gopkg.in/ukautz/clif.v1"
 )
 
-func cmdList() *clif.Command {
+func cmdStatus() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output) {
 		out.Printf("a long list.\n")
 		githubcommands.GetItems(c)
@@ -16,5 +16,5 @@ func cmdList() *clif.Command {
 }
 
 func init() {
-	Commands = append(Commands, cmdList)
+	Commands = append(Commands, cmdStatus)
 }
