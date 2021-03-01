@@ -1,4 +1,4 @@
-package githubcommands
+package common
 
 import (
 	"context"
