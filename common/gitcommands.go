@@ -9,7 +9,7 @@ import (
 	"github.com/go-git/go-git"
 )
 
-func GetGitdir() (gitBasedir *string) {
+func GetGitdir() (gitBasedir *string, repo *git.Repository) {
 	dir, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -29,9 +29,9 @@ func GetGitdir() (gitBasedir *string) {
 		} else {
 			fmt.Println(testdir, "is a git dir")
 			fmt.Println(repo.Remotes())
-			return &testdir
+			return &testdir, repo
 		}
 
 	}
-	return nil
+	return nil, nil
 }

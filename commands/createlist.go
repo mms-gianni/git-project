@@ -11,10 +11,12 @@ func cmdCreatelist() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output, in clif.Input) {
 		out.Printf("Create a new list\n")
 
-		gitBasedir := gitcommands.GetGitdir()
+		_, repo := gitcommands.GetGitdir()
 
-		if gitBasedir == nil {
+		if repo == nil {
 			githubcommands.CreatePersonalList(c, in)
+		} else {
+			githubcommands.CreateRepoProject(c, in, repo)
 		}
 
 	}

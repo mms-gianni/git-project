@@ -3,8 +3,10 @@ package common
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 
+	"github.com/go-git/go-git"
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 	"gopkg.in/ukautz/clif.v1"
@@ -14,6 +16,44 @@ var ctx = context.Background()
 
 func init() {
 	fmt.Println("This will get called on main initialization")
+}
+
+func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
+
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: c.Option("githubtoken").String()},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
+
+	remotes, _ := repo.Remotes()
+	re := regexp.MustCompile(`.*git@github.com:(.*)/(.*)\.git \(fetch\)`)
+	findings := re.FindAllStringSubmatch(remotes[0].String(), -1)
+	owner := findings[0][1]
+	repositoryname := findings[0][2]
+
+	fmt.Println("Owner: ", owner)
+	fmt.Println("Repositoryname:", repositoryname)
+
+	name := ""
+	if c.Argument("name") == nil {
+		name = c.Argument("name").String()
+	} else {
+		name = in.Ask("Define the name of the new todo list: ", nil)
+	}
+	body := ""
+	if c.Option("description") != nil {
+		body = c.Option("description").String()
+	}
+	public := false
+	if c.Option("public").Bool() {
+		public = true
+	}
+	project, _, projectErr := client.Repositories.CreateProject(ctx, owner, repositoryname, &github.ProjectOptions{Name: &name, Body: &body, Public: &public})
+	if projectErr == nil {
+		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "open"})
+		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "closed"})
+	}
 }
 
 func CreatePersonalList(c *clif.Command, in clif.Input) {
