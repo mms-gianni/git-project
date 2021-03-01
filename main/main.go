@@ -12,7 +12,7 @@ func addDefaultOptions(cli *clif.Cli) {
 }
 
 func main() {
-	cli := clif.New("giTODO", "0.0.1", "An cli todo list connected with github")
+	cli := clif.New("git-todo", "0.0.1", "An cli todo list connected with github")
 	addDefaultOptions(cli)
 
 	for _, cb := range commands.Commands {
