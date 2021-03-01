@@ -11,7 +11,7 @@ func cmdStatus() *clif.Command {
 		githubcommands.GetItems(c)
 	}
 
-	return clif.NewCommand("status", "List all Todo", cb).
+	return clif.NewCommand("status", "List all projects and cards", cb).
 		NewArgument("repo", "Show only repo", "", false, false)
 }
 

@@ -29,7 +29,7 @@ func cmdCreate() *clif.Command {
 
 	}
 
-	return clif.NewCommand("create", "Create a new Project", cb).
+	return clif.NewCommand("create", "Create a new project", cb).
 		NewArgument("name", "Name of the new Project", "", false, false).
 		NewArgument("repo", "create in repo", "", false, false).
 		NewOption("description", "d", "Description", "", false, false).

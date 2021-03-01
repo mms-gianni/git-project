@@ -11,7 +11,7 @@ func cmdAdd() *clif.Command {
 		githubcommands.CreateItem(c, in)
 	}
 
-	return clif.NewCommand("add", "Add a new item", cb).
+	return clif.NewCommand("add", "Add a new card", cb).
 		NewArgument("project", "Show only repo", "", false, false).
 		NewArgument("message", "Message", "<empty>", false, false).
 		NewArgument("status", "Status", "open", false, false)
