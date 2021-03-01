@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"strconv"
 
 	"github.com/go-git/go-git"
@@ -22,11 +21,14 @@ func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	remotes, _ := repo.Remotes()
-	re := regexp.MustCompile(`.*git@github.com:(.*)/(.*)\.git \(fetch\)`)
-	findings := re.FindAllStringSubmatch(remotes[0].String(), -1)
-	owner := findings[0][1]
-	repositoryname := findings[0][2]
+	/*
+		remotes, _ := repo.Remotes()
+		re := regexp.MustCompile(`.*git@github.com:(.*)/(.*)\.git \(fetch\)`)
+		findings := re.FindAllStringSubmatch(remotes[0].String(), -1)
+		owner := findings[0][1]
+		repositoryname := findings[0][2]
+	*/
+	owner, repositoryname := getRepodetails(repo)
 
 	fmt.Println("Owner: ", owner)
 	fmt.Println("Repositoryname:", repositoryname)
@@ -137,10 +139,22 @@ func getProjects(client *github.Client) []*github.Project {
 
 	// https://pkg.go.dev/github.com/google/go-github/v33/github#OrganizationsService.ListProjects
 	// https://pkg.go.dev/github.com/google/go-github/v33/github#Project
-	userprojects, res, err := client.Users.ListProjects(ctx, "mms-gianni", nil)
+	userprojects, _, _ := client.Users.ListProjects(ctx, "mms-gianni", nil)
 	//fmt.Println(userprojects)
-	fmt.Println(res.Status)
-	fmt.Println(err)
+	//fmt.Println(res.Status)
+	//fmt.Println(err)
+
+	_, repo := GetGitdir()
+
+	if repo != nil {
+		owner, repositoryname := getRepodetails(repo)
+
+		fmt.Println("Owner: ", owner)
+		fmt.Println("Repositoryname:", repositoryname)
+		repoprojects, _, _ := client.Repositories.ListProjects(ctx, owner, repositoryname, nil)
+
+		userprojects = append(userprojects, repoprojects...)
+	}
 
 	return userprojects
 }
