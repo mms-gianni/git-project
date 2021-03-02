@@ -1,5 +1,5 @@
 # git-project
-Manage your github projects with yout git cli
+Manage your github projects with your git cli
 
 ## Why
 - atomate your projects
