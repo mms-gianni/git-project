@@ -12,7 +12,7 @@ func addDefaultOptions(cli *clif.Cli) {
 }
 
 func main() {
-	cli := clif.New("git-project", "DEV-VERSION", "Manage your github projects with git cli")
+	cli := clif.New("git-project", "$VERSION", "Manage your github projects with git cli")
 	addDefaultOptions(cli)
 
 	for _, cb := range commands.Commands {
