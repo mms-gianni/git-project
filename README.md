@@ -7,7 +7,8 @@ Manage your github projects with yout git cli
 
 ## installation
 ```
-curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cms/git-project.mac.64bit -o /usr/local/bin/git-project
+export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"
+curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cmd/git-project/git-project.mac.64bit -o /usr/local/bin/git-project
 ```
 
 

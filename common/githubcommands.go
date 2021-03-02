@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/go-git/go-git"
-	"github.com/google/go-github/github"
+	"github.com/go-git/go-git/v5"
+	"github.com/google/go-github/v33/github"
 	"golang.org/x/oauth2"
 	"gopkg.in/ukautz/clif.v1"
 )
