@@ -19,6 +19,10 @@ jobs:
       with:
         go-version: 1.15
 
+    - name: Bump version
+      id: bump_version
+      run: sed -i 's/DEV-VERSION/${{ github.ref }}/g' input.txt
+
     - name: Build
       id: build_release
       run: make all
