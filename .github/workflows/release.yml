@@ -69,4 +69,4 @@ jobs:
         git config --global user.name "Build Job"
         git add .
         git commit -m "added rebuilded binaries"
-        git push
+        git push origin HEAD:master
