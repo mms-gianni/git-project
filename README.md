@@ -1,12 +1,16 @@
 # git-project
 Manage your github projects with your git cli
 
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mms-gianni/git-project)
+![GitHub top language](https://img.shields.io/github/languages/top/mms-gianni/git-project)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mms-gianni/git-project/Upload%20Release%20Asset)
 ## Why
 - atomate your projects
 - manage your projects where you work
 - use it as your personal todo list
 
 ## Installation
+Generate a token here : https://github.com/settings/tokens (You need to be loged in)
 ```
 export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"
 curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cmd/git-project/git-project.mac.64bit -o /usr/local/bin/git-project
@@ -38,11 +42,16 @@ git project add
 git project status
 ```
 
-### close a obsolete project (can be reopened on github)
+### Cleanup all Cards in state "closed"
+```
+git project clean
+```
+
+### Close a obsolete project (can be reopened on github)
 ```
 git project close
 ```
-## help and shortcuts
+## Help and shortcuts
 ```
 git project list
 ```
