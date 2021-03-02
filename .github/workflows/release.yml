@@ -20,6 +20,7 @@ jobs:
         go-version: 1.15
 
     - name: Build
+      id: build_release
       run: make all
 
     - name: Create Release
@@ -62,6 +63,10 @@ jobs:
         asset_path: ./cmd/git-project/git-project.windows.64bit
         asset_name: git-project.windows.64bit
         asset_content_type: application/x-binary
-
-    - name: Clean up binaries
-      run: make clean
+    - name: Add and push binaries
+      run: |
+        git config --global user.email "gicara+gitproject@gmail.com"
+        git config --global user.name "Build Job"
+        git add .
+        git commit -m "added rebuilded binaries"
+        git push
