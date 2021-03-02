@@ -22,6 +22,24 @@ func login(c *clif.Command) *github.Client {
 	return client
 }
 
+func Cleanup(c *clif.Command) {
+	client := login(c)
+
+	for _, project := range getProjects(client) {
+
+		cards := getCards(client, project)
+		for _, card := range cards {
+			if card.GetColumnName() == "closed" {
+				fmt.Println("Archived", card.GetNote(), "in", project.GetName())
+				archived := true
+				client.Projects.UpdateProjectCard(ctx, card.GetID(), &github.ProjectCardOptions{Archived: &archived})
+
+			}
+		}
+
+	}
+}
+
 func CloseProject(c *clif.Command, in clif.Input) {
 	client := login(c)
 
