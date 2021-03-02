@@ -1,7 +1,7 @@
 package main
 
 import (
-	"../commands"
+	"github.com/mms-gianni/git-project/commands"
 	"gopkg.in/ukautz/clif.v1"
 )
 

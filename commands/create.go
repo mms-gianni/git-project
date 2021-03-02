@@ -1,8 +1,8 @@
 package commands
 
 import (
-	gitcommands "../common"
-	githubcommands "../common"
+	gitcommands "github.com/mms-gianni/git-project/common"
+	githubcommands "github.com/mms-gianni/git-project/common"
 
 	"gopkg.in/ukautz/clif.v1"
 )
