@@ -3,9 +3,10 @@ Manage your github projects with yout git cli
 
 ## Why
 - atomate your projects
+- manage your projects where you work
 - use it as your personal todo list
 
-## installation
+## Installation
 ```
 export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"
 curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cmd/git-project/git-project.mac.64bit -o /usr/local/bin/git-project
@@ -37,7 +38,10 @@ git project add
 git project status
 ```
 
-
+### close a obsolete project (can be reopened on github)
+```
+git project close
+```
 ## help and shortcuts
 ```
 git project list

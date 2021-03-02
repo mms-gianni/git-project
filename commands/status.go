@@ -7,7 +7,6 @@ import (
 
 func cmdStatus() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output) {
-		out.Printf("a long list.\n")
 		githubcommands.GetItems(c)
 	}
 

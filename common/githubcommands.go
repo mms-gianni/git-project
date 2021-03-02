@@ -13,21 +13,30 @@ import (
 
 var ctx = context.Background()
 
-func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
-
+func login(c *clif.Command) *github.Client {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: c.Option("githubtoken").String()},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
+	return client
+}
 
-	/*
-		remotes, _ := repo.Remotes()
-		re := regexp.MustCompile(`.*git@github.com:(.*)/(.*)\.git \(fetch\)`)
-		findings := re.FindAllStringSubmatch(remotes[0].String(), -1)
-		owner := findings[0][1]
-		repositoryname := findings[0][2]
-	*/
+func CloseProject(c *clif.Command, in clif.Input) {
+	client := login(c)
+
+	var selectedProject *github.Project
+	if c.Argument("name").String() == "" {
+		selectedProject = selectProject(client, in)
+	}
+
+	state := "closed"
+	client.Projects.UpdateProject(ctx, selectedProject.GetID(), &github.ProjectOptions{State: &state})
+}
+
+func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
+	client := login(c)
+
 	repositorydetails := getRepodetails(repo)
 
 	fmt.Println("Owner: ", repositorydetails.owner)
@@ -55,12 +64,7 @@ func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
 }
 
 func CreatePersonalProject(c *clif.Command, in clif.Input) {
-
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: c.Option("githubtoken").String()},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
+	client := login(c)
 
 	name := ""
 	if c.Argument("name").String() != "" {
@@ -87,12 +91,7 @@ func CreatePersonalProject(c *clif.Command, in clif.Input) {
 }
 
 func GetItems(c *clif.Command) {
-
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: c.Option("githubtoken").String()},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
+	client := login(c)
 
 	for _, project := range getProjects(client) {
 		fmt.Println("\n\nList: ", project.GetName(), "("+project.GetState()+")")
@@ -105,12 +104,7 @@ func GetItems(c *clif.Command) {
 }
 
 func CreateItem(c *clif.Command, in clif.Input) {
-
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: c.Option("githubtoken").String()},
-	)
-	tc := oauth2.NewClient(ctx, ts)
-	client := github.NewClient(tc)
+	client := login(c)
 
 	selectedProject := selectProject(client, in)
 
@@ -140,9 +134,6 @@ func getProjects(client *github.Client) []*github.Project {
 	// https://pkg.go.dev/github.com/google/go-github/v33/github#OrganizationsService.ListProjects
 	// https://pkg.go.dev/github.com/google/go-github/v33/github#Project
 	userprojects, _, _ := client.Users.ListProjects(ctx, "mms-gianni", nil)
-	//fmt.Println(userprojects)
-	//fmt.Println(res.Status)
-	//fmt.Println(err)
 
 	_, repo := GetGitdir()
 
