@@ -33,7 +33,7 @@ jobs:
         draft: false
         prerelease: false
     - name: Upload linux binary
-      id: upload-release-asset 
+      id: upload-release-linux-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -43,7 +43,7 @@ jobs:
         asset_name: git-project.linux.64bit
         asset_content_type: application/x-binary
     - name: Upload mac binary
-      id: upload-release-asset 
+      id: upload-release-mac-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,7 +53,7 @@ jobs:
         asset_name: git-project.mac.64bit
         asset_content_type: application/x-binary
     - name: Upload windows binary
-      id: upload-release-asset 
+      id: upload-release-windows-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
