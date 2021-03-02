@@ -7,7 +7,6 @@ import (
 
 func cmdAdd() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output, in clif.Input) {
-		out.Printf("add a TODO.\n")
 		githubcommands.CreateItem(c, in)
 	}
 

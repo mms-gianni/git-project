@@ -28,33 +28,33 @@ func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
 		owner := findings[0][1]
 		repositoryname := findings[0][2]
 	*/
-	owner, repositoryname := getRepodetails(repo)
+	repositorydetails := getRepodetails(repo)
 
-	fmt.Println("Owner: ", owner)
-	fmt.Println("Repositoryname:", repositoryname)
+	fmt.Println("Owner: ", repositorydetails.owner)
+	fmt.Println("Repositoryname:", repositorydetails.name)
 
 	name := ""
-	if c.Argument("name") == nil {
+	if c.Argument("name").String() != "" {
 		name = c.Argument("name").String()
 	} else {
-		name = in.Ask("Define the name of the new todo list: ", nil)
+		name = in.Ask("Define the name of the new project: ", nil)
 	}
 	body := ""
-	if c.Option("description") != nil {
+	if c.Option("description").String() != "" {
 		body = c.Option("description").String()
 	}
 	public := false
 	if c.Option("public").Bool() {
 		public = true
 	}
-	project, _, projectErr := client.Repositories.CreateProject(ctx, owner, repositoryname, &github.ProjectOptions{Name: &name, Body: &body, Public: &public})
+	project, _, projectErr := client.Repositories.CreateProject(ctx, repositorydetails.owner, repositorydetails.name, &github.ProjectOptions{Name: &name, Body: &body, Public: &public})
 	if projectErr == nil {
 		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "open"})
 		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "closed"})
 	}
 }
 
-func CreatePersonalList(c *clif.Command, in clif.Input) {
+func CreatePersonalProject(c *clif.Command, in clif.Input) {
 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: c.Option("githubtoken").String()},
@@ -63,16 +63,16 @@ func CreatePersonalList(c *clif.Command, in clif.Input) {
 	client := github.NewClient(tc)
 
 	name := ""
-	if c.Argument("name") == nil {
+	if c.Argument("name").String() != "" {
 		name = c.Argument("name").String()
 	} else {
-		name = in.Ask("Define the name of the new todo list: ", nil)
+		name = in.Ask("Define the name of the new project: ", nil)
 	}
 	project, _, projectErr := client.Users.CreateProject(ctx, &github.CreateUserProjectOptions{Name: name})
 
 	if projectErr == nil {
 		body := ""
-		if c.Option("description") != nil {
+		if c.Option("description").String() != "" {
 			body = c.Option("description").String()
 		}
 		public := false
@@ -147,11 +147,11 @@ func getProjects(client *github.Client) []*github.Project {
 	_, repo := GetGitdir()
 
 	if repo != nil {
-		owner, repositoryname := getRepodetails(repo)
+		repositorydetails := getRepodetails(repo)
 
-		fmt.Println("Owner: ", owner)
-		fmt.Println("Repositoryname:", repositoryname)
-		repoprojects, _, _ := client.Repositories.ListProjects(ctx, owner, repositoryname, nil)
+		fmt.Println("Owner: ", repositorydetails.owner)
+		fmt.Println("Repositoryname:", repositorydetails.name)
+		repoprojects, _, _ := client.Repositories.ListProjects(ctx, repositorydetails.owner, repositorydetails.name, nil)
 
 		userprojects = append(userprojects, repoprojects...)
 	}

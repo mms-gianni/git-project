@@ -10,6 +10,11 @@ import (
 	"github.com/go-git/go-git"
 )
 
+type repoDetails struct {
+	name  string
+	owner string
+}
+
 func GetGitdir() (gitBasedir *string, repo *git.Repository) {
 	dir, err := os.Getwd()
 	if err != nil {
@@ -36,9 +41,12 @@ func GetGitdir() (gitBasedir *string, repo *git.Repository) {
 	return nil, nil
 }
 
-func getRepodetails(repo *git.Repository) (owner string, repositoryname string) {
+func getRepodetails(repo *git.Repository) (r *repoDetails) {
 	remotes, _ := repo.Remotes()
 	re := regexp.MustCompile(`.*git@github.com:(.*)/(.*)\.git \(fetch\)`)
 	findings := re.FindAllStringSubmatch(remotes[0].String(), -1)
-	return findings[0][1], findings[0][2]
+
+	repodetails := repoDetails{owner: findings[0][1], name: findings[0][2]}
+
+	return &repodetails
 }
