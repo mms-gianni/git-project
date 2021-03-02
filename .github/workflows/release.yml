@@ -23,7 +23,7 @@ jobs:
       id: bump_version
       run: | 
         export VERSION=$(echo ${{ github.ref }} | awk -F'/' '{print $3}')
-        sed -i 's/DEV-VERSION/$VERSION/g' input.txt
+        sed -i 's/DEV-VERSION/$VERSION/g' main/main.go
 
     - name: Build
       id: build_release
