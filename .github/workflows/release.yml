@@ -21,7 +21,9 @@ jobs:
 
     - name: Bump version
       id: bump_version
-      run: sed -i 's/DEV-VERSION/${{ github.ref }}/g' input.txt
+      run: | 
+        export VERSION=$(echo ${{ github.ref }} | awk -F'/' '{print $3}')
+        sed -i 's/DEV-VERSION/$VERSION/g' input.txt
 
     - name: Build
       id: build_release
