@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -160,9 +161,17 @@ func GetStatus(c *clif.Command, out clif.Output) []CardslistItem {
 	var cardslist []CardslistItem
 	for _, project := range projectslist {
 		cards := getCards(client, project)
-		out.Printf("\n<subline>List: " + project.GetName() + "<reset>\n")
+		out.Printf("\n<subline>Project: " + project.GetName() + "<reset>\n")
 		for _, card := range cards {
-			out.Printf(strconv.Itoa(item) + "|  <" + card.GetColumnName() + ">  " + card.GetNote() + "\n")
+			title := ""
+			if card.GetContentURL() != "" {
+				issue := getIssueDetails(c, card.GetContentURL())
+				title = "Issue #" + strconv.Itoa(issue.GetNumber()) + " : " + issue.GetTitle()
+			} else {
+				title = card.GetNote()
+			}
+
+			out.Printf("%3s|  <%s>  %s\n", strconv.Itoa(item), card.GetColumnName(), title)
 			cardslist = append(cardslist, CardslistItem{
 				id:          item,
 				carddetails: card,
@@ -173,6 +182,18 @@ func GetStatus(c *clif.Command, out clif.Output) []CardslistItem {
 	}
 
 	return cardslist
+}
+
+func getIssueDetails(c *clif.Command, issueURL string) *github.Issue {
+	client := login(c)
+
+	re := regexp.MustCompile(`https://api.github.com/repos/(.*)/(.*)/issues/(.*)`)
+	findings := re.FindAllStringSubmatch(issueURL, -1)
+
+	issueNR, _ := strconv.Atoi(findings[0][3])
+	issue, _, _ := client.Issues.Get(ctx, findings[0][1], findings[0][2], issueNR)
+
+	return issue
 }
 
 func MoveCard(c *clif.Command, out clif.Output, in clif.Input) {

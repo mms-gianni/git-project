@@ -37,7 +37,7 @@ func main() {
 		"open":        "\U00002B50",
 		"done":        "\U00002705",
 		"closed":      "\U0001F512",
-		"in progress": "\U0001F528",
+		"in progress": "\U0001F525",
 		"waiting":     "\U0001F551",
 		"critical":    "\U000026A0",
 		"idea":        "\U0001F4A1",
