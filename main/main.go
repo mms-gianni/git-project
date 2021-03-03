@@ -13,7 +13,10 @@ func addDefaultOptions(cli *clif.Cli) {
 
 	githubusername := clif.NewOption("username", "u", "Github username", "", false, false).
 		SetEnv("GITHUB_USERNAME")
-	cli.AddDefaultOptions(githubtoken, githubusername)
+
+	githubOrganisations := clif.NewOption("organisations", "o", "Github organisations (comma separated)", "", false, false).
+		SetEnv("GITHUB_ORGANISATIONS")
+	cli.AddDefaultOptions(githubtoken, githubusername, githubOrganisations)
 }
 
 func main() {

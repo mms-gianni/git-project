@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/google/go-github/v33/github"
@@ -31,7 +32,7 @@ type CardslistItem struct {
 func Cleanup(c *clif.Command, out clif.Output) {
 	client := login(c)
 
-	for _, project := range getProjects(client, c.Option("username").String()) {
+	for _, project := range getProjects(client, c.Option("username").String(), c.Option("organisations").String()) {
 
 		cards := getCards(client, project)
 		for _, card := range cards {
@@ -51,7 +52,7 @@ func Cleanup(c *clif.Command, out clif.Output) {
 func CloseProject(c *clif.Command, in clif.Input, out clif.Output) {
 	client := login(c)
 
-	selectedProject := selectProject(client, in, c.Argument("project").String(), c.Option("username").String())
+	selectedProject := selectProject(client, in, c.Argument("project").String(), c.Option("username").String(), c.Option("organisations").String())
 
 	state := "closed"
 	project, _, err := client.Projects.UpdateProject(ctx, selectedProject.GetID(), &github.ProjectOptions{State: &state})
@@ -150,9 +151,9 @@ func GetStatus(c *clif.Command, out clif.Output) []CardslistItem {
 
 	var projectslist []*github.Project
 	if c.Argument("project").String() == "" {
-		projectslist = getProjects(client, c.Option("username").String())
+		projectslist = getProjects(client, c.Option("username").String(), c.Option("organisations").String())
 	} else {
-		projectslist = append(projectslist, getProjectByName(client, c.Argument("project").String(), c.Option("username").String()))
+		projectslist = append(projectslist, getProjectByName(client, c.Argument("project").String(), c.Option("username").String(), c.Option("organisations").String()))
 	}
 
 	item := 0
@@ -177,7 +178,7 @@ func GetStatus(c *clif.Command, out clif.Output) []CardslistItem {
 func MoveCard(c *clif.Command, out clif.Output, in clif.Input) {
 	client := login(c)
 
-	selectedProject := selectProject(client, in, c.Argument("project").String(), c.Option("username").String())
+	selectedProject := selectProject(client, in, c.Argument("project").String(), c.Option("username").String(), c.Option("organisations").String())
 
 	var selectedCard *github.ProjectCard
 	cards := getCards(client, selectedProject)
@@ -201,7 +202,7 @@ func MoveCard(c *clif.Command, out clif.Output, in clif.Input) {
 func CreateCard(c *clif.Command, in clif.Input, out clif.Output) {
 	client := login(c)
 
-	selectedProject := selectProject(client, in, c.Argument("project").String(), c.Option("username").String())
+	selectedProject := selectProject(client, in, c.Argument("project").String(), c.Option("username").String(), c.Option("organisations").String())
 
 	projectColumns, _, _ := client.Projects.ListProjectColumns(ctx, selectedProject.GetID(), nil)
 
@@ -254,10 +255,10 @@ func selectCardByNote(cards []*github.ProjectCard, searchedCard string) *github.
 	return nil
 }
 
-func selectProject(client *github.Client, in clif.Input, preselectedProject string, username string) *github.Project {
+func selectProject(client *github.Client, in clif.Input, preselectedProject string, username string, organisations string) *github.Project {
 	choices := make(map[string]string)
 
-	userprojects := getProjects(client, username)
+	userprojects := getProjects(client, username, organisations)
 	for key, project := range userprojects {
 		choices[strconv.Itoa(key)] = project.GetName()
 		if project.GetName() == preselectedProject {
@@ -269,8 +270,8 @@ func selectProject(client *github.Client, in clif.Input, preselectedProject stri
 	return userprojects[selectedNr]
 }
 
-func getProjectByName(client *github.Client, projectname string, username string) *github.Project {
-	userprojects := getProjects(client, username)
+func getProjectByName(client *github.Client, projectname string, username string, organisations string) *github.Project {
+	userprojects := getProjects(client, username, organisations)
 	for _, project := range userprojects {
 		if project.GetName() == projectname {
 			return project
@@ -279,7 +280,7 @@ func getProjectByName(client *github.Client, projectname string, username string
 	return nil
 }
 
-func getProjects(client *github.Client, username string) []*github.Project {
+func getProjects(client *github.Client, username string, organisations string) []*github.Project {
 
 	// https://pkg.go.dev/github.com/google/go-github/v33/github#OrganizationsService.ListProjects
 	// https://pkg.go.dev/github.com/google/go-github/v33/github#Project
@@ -293,6 +294,11 @@ func getProjects(client *github.Client, username string) []*github.Project {
 		repoprojects, _, _ := client.Repositories.ListProjects(ctx, repositorydetails.owner, repositorydetails.name, nil)
 
 		userprojects = append(userprojects, repoprojects...)
+	}
+
+	for _, organisation := range strings.Split(organisations, ",") {
+		organisationProjects, _, _ := client.Organizations.ListProjects(ctx, organisation, nil)
+		userprojects = append(userprojects, organisationProjects...)
 	}
 
 	return userprojects
