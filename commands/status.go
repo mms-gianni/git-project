@@ -10,8 +10,8 @@ func cmdStatus() *clif.Command {
 		githubcommands.GetStatus(c, out)
 	}
 
-	return clif.NewCommand("status", "List all projects and cards", cb).
-		NewArgument("project", "Show only project", "", false, false)
+	return clif.NewCommand("status", "List projects and cards", cb).
+		NewArgument("project", "Show only this project", "", false, false)
 }
 
 func init() {
