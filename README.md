@@ -14,9 +14,11 @@ Manage your github projects with your git cli
 ## Installation
 Generate a token here : https://github.com/settings/tokens (You need to be loged in)
 
+To export the Github username is optional. But it requred to access your personal profile projects. 
 ### Mac
 ```
 echo 'export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"' >> ~/.zshrc
+echo 'export GITHUB_USERNAME="change-me-to-your-username"' >> ~/.zshrc
 curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cmd/git-project/git-project.mac.64bit -o /usr/local/bin/git-project
 chmod +x /usr/local/bin/git-project
 ```
@@ -24,9 +26,13 @@ chmod +x /usr/local/bin/git-project
 ### Linux 
 ```
 echo 'export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"' >> ~/.bashrc
+echo 'export GITHUB_USERNAME="change-me-to-your-username"' >> ~/.bashrc
 curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cmd/git-project/git-project.linux.64bit -o /usr/local/bin/git-project
 chmod +x /usr/local/bin/git-project
 ```
+
+### Windows
+It works also on Windows. But since i have no windows in my basement, I have no idea how to install it (Help welcome :D )
 
 You find older releases here : https://github.com/mms-gianni/git-project/releases
 
@@ -34,7 +40,7 @@ You find older releases here : https://github.com/mms-gianni/git-project/release
 
 ### Create your first personl project in your profile
 ```
-git project open -u
+git project open -U
 ```
 
 ### Create a repository related project

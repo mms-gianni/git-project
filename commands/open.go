@@ -15,7 +15,7 @@ func cmdOpen() *clif.Command {
 		NewArgument("project", "Name of the new Project", "", false, false).
 		NewOption("description", "d", "Description", "", false, false).
 		NewFlag("public", "p", "Make this project public (Organisations only)", false).
-		NewFlag("profile", "u", "Open it in your user profile", false)
+		NewFlag("profile", "U", "Open it in your user profile", false)
 }
 
 func init() {
