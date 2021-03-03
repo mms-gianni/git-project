@@ -12,11 +12,22 @@ Manage your github projects with your git cli
 
 ## Installation
 Generate a token here : https://github.com/settings/tokens (You need to be loged in)
+
+### Mac
 ```
-export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"
+echo 'export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"' >> ~/.zshrc
 curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cmd/git-project/git-project.mac.64bit -o /usr/local/bin/git-project
+chmod +x /usr/local/bin/git-project
 ```
 
+### Linux 
+```
+echo 'export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"' >> ~/.bashrc
+curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cmd/git-project/git-project.linux.64bit -o /usr/local/bin/git-project
+chmod +x /usr/local/bin/git-project
+```
+
+You find older releases here : https://github.com/mms-gianni/git-project/releases
 
 ## Quick start
 
