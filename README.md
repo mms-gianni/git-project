@@ -4,6 +4,7 @@ Manage your github projects with your git cli
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mms-gianni/git-project)
 ![GitHub top language](https://img.shields.io/github/languages/top/mms-gianni/git-project)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mms-gianni/git-project/Upload%20Release%20Asset)
+![GitHub MIT license](https://img.shields.io/github/license/mms-gianni/git-project)
 ![Swiss made](https://img.shields.io/badge/swiss%20made-100%25-red)
 ## Why
 - atomate your projects
@@ -52,6 +53,11 @@ git project add
 
 ```
 git project status
+```
+
+### Move a card to another column
+```
+git project move
 ```
 
 ### Cleanup all Cards in column "done"
