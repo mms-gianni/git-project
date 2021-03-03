@@ -12,7 +12,7 @@ func cmdAdd() *clif.Command {
 
 	return clif.NewCommand("add", "Add a new card", cb).
 		NewArgument("project", "Show only repo", "", false, false).
-		NewArgument("message", "Message", "<empty>", false, false).
+		NewArgument("note", "Note to add", "<empty>", false, false).
 		NewArgument("status", "Status", "open", false, false)
 }
 

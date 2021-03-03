@@ -78,12 +78,12 @@ git project list
 git project help open
 ```
 
-### create a personal list with one shot
+### Create a personal list with one shot
 ```
 git project create shoppinglist -p -d "helps me to remember what to buy"
 ```
 
-### move a card arround 
+### Move a card arround 
 ```
 git project move shoppinglist -c milk -d done
 ```

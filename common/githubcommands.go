@@ -205,7 +205,12 @@ func CreateCard(c *clif.Command, in clif.Input, out clif.Output) {
 
 	projectColumns, _, _ := client.Projects.ListProjectColumns(ctx, selectedProject.GetID(), nil)
 
-	message := in.Ask("What is the task", nil)
+	message := ""
+	if c.Argument("note").String() == "" {
+		message = in.Ask("What is the task", nil)
+	} else {
+		message = c.Argument("note").String()
+	}
 
 	card, _, cardErr := client.Projects.CreateProjectCard(ctx, projectColumns[0].GetID(), &github.ProjectCardOptions{Note: message})
 
