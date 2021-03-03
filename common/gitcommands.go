@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -33,7 +32,7 @@ func GetGitdir() (gitBasedir *string, repo *git.Repository) {
 		if giterror != nil {
 			//fmt.Println(giterror, "in", testdir)
 		} else {
-			fmt.Println(testdir, "is a git dir")
+			//fmt.Println(testdir, "is a git dir")
 			return &testdir, repo
 		}
 

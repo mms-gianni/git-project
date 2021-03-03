@@ -27,9 +27,14 @@ func main() {
 		"important":   "\033[47;30;1m",
 		"query":       "\033[36m",
 		"reset":       "\033[0m",
+		"new":         "\U00002728",
 		"open":        "\U00002B50",
 		"done":        "\U00002705",
+		"closed":      "\U0001F512",
 		"in progress": "\U0001F528",
+		"waiting":     "\U0001F551",
+		"critical":    "\U000026A0",
+		"idea":        "\U0001F4A1",
 	}
 
 	cli.SetOutput(clif.NewColorOutput(os.Stdout).SetFormatter(clif.NewDefaultFormatter(OwnStyles)))

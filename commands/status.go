@@ -7,11 +7,11 @@ import (
 
 func cmdStatus() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output) {
-		githubcommands.GetItems(c, out)
+		githubcommands.GetStatus(c, out)
 	}
 
 	return clif.NewCommand("status", "List all projects and cards", cb).
-		NewArgument("repo", "Show only repo", "", false, false)
+		NewArgument("project", "Show only project", "", false, false)
 }
 
 func init() {

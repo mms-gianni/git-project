@@ -22,6 +22,12 @@ func login(c *clif.Command) *github.Client {
 	return client
 }
 
+type CardslistItem struct {
+	id          int
+	carddetails *github.ProjectCard
+	project     *github.Project
+}
+
 func Cleanup(c *clif.Command) {
 	client := login(c)
 
@@ -43,26 +49,52 @@ func Cleanup(c *clif.Command) {
 func CloseProject(c *clif.Command, in clif.Input) {
 	client := login(c)
 
-	var selectedProject *github.Project
-	if c.Argument("name").String() == "" {
-		selectedProject = selectProject(client, in)
-	}
+	selectedProject := selectProject(client, in, c.Argument("project").String())
+	/*
+		if c.Argument("name").String() == "" {
+			selectedProject = selectProject(client, in)
+		}
+	*/
 
 	state := "closed"
 	client.Projects.UpdateProject(ctx, selectedProject.GetID(), &github.ProjectOptions{State: &state})
+}
+func CreateProject(c *clif.Command, in clif.Input) {
+	_, repo := GetGitdir()
+
+	if repo == nil {
+		CreatePersonalProject(c, in)
+	} else {
+		space := "2"
+
+		if c.Option("profile").Bool() {
+			space = "1"
+		} else {
+			repodetails := getRepodetails(repo)
+			space = in.Choose("This directory seems to be a repo. In which space do you want to create the project?", map[string]string{
+				"1": "Profile",
+				"2": "Repository (" + repodetails.name + ")",
+			})
+		}
+		if space == "1" {
+			CreatePersonalProject(c, in)
+		} else {
+			CreateRepoProject(c, in, repo)
+		}
+	}
 }
 
 func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
 	client := login(c)
 
 	repositorydetails := getRepodetails(repo)
-
-	fmt.Println("Owner: ", repositorydetails.owner)
-	fmt.Println("Repositoryname:", repositorydetails.name)
-
+	/*
+		fmt.Println("Owner: ", repositorydetails.owner)
+		fmt.Println("Repositoryname:", repositorydetails.name)
+	*/
 	name := ""
-	if c.Argument("name").String() != "" {
-		name = c.Argument("name").String()
+	if c.Argument("project").String() != "" {
+		name = c.Argument("project").String()
 	} else {
 		name = in.Ask("Define the name of the new project: ", nil)
 	}
@@ -85,8 +117,8 @@ func CreatePersonalProject(c *clif.Command, in clif.Input) {
 	client := login(c)
 
 	name := ""
-	if c.Argument("name").String() != "" {
-		name = c.Argument("name").String()
+	if c.Argument("project").String() != "" {
+		name = c.Argument("project").String()
 	} else {
 		name = in.Ask("Define the name of the new project: ", nil)
 	}
@@ -108,23 +140,68 @@ func CreatePersonalProject(c *clif.Command, in clif.Input) {
 
 }
 
-func GetItems(c *clif.Command, out clif.Output) {
+func GetStatus(c *clif.Command, out clif.Output) []CardslistItem {
 	client := login(c)
 
-	for _, project := range getProjects(client) {
-		out.Printf("\n\n<subline>List: " + project.GetName() + "<reset>\n")
+	var projectslist []*github.Project
+	if c.Argument("project").String() == "" {
+		projectslist = getProjects(client)
+	} else {
+		projectslist = append(projectslist, getProjectByName(client, c.Argument("project").String()))
+	}
+
+	item := 0
+	var cardslist []CardslistItem
+	for _, project := range projectslist {
 		cards := getCards(client, project)
+		out.Printf("\n<subline>List: " + project.GetName() + "<reset>\n")
 		for _, card := range cards {
 			//fmt.Println("  <"+card.GetColumnName()+">", " ", card.GetNote())
-			out.Printf("  <" + card.GetColumnName() + "> " + card.GetNote() + "\n")
+			out.Printf(strconv.Itoa(item) + "|  <" + card.GetColumnName() + ">  " + card.GetNote() + "\n")
+			cardslist = append(cardslist, CardslistItem{
+				id:          item,
+				carddetails: card,
+				project:     project,
+			})
+			item++
 		}
 	}
+
+	return cardslist
 }
 
-func CreateItem(c *clif.Command, in clif.Input) {
+func MoveCard(c *clif.Command, out clif.Output, in clif.Input) {
 	client := login(c)
 
-	selectedProject := selectProject(client, in)
+	selectedProject := selectProject(client, in, c.Argument("project").String())
+	/*
+		if c.Argument("project").String() == "" {
+			selectedProject = selectProject(client, in)
+		}
+	*/
+
+	var selectedCard *github.ProjectCard
+	if c.Option("card").String() == "" {
+		selectedCard = selectCard(client, in, selectedProject)
+	}
+
+	var selectedColumn *github.ProjectColumn
+	if c.Option("card").String() == "" {
+		selectedColumn = selectColumn(client, in, selectedProject)
+	}
+
+	_, err := client.Projects.MoveProjectCard(ctx, selectedCard.GetID(), &github.ProjectCardMoveOptions{Position: "bottom", ColumnID: selectedColumn.GetID()})
+
+	if err == nil {
+		out.Printf("\n\nMoved '" + selectedCard.GetNote() + "' to <" + selectedColumn.GetName() + "> " + selectedColumn.GetName() + "\n")
+	}
+
+}
+
+func CreateCard(c *clif.Command, in clif.Input) {
+	client := login(c)
+
+	selectedProject := selectProject(client, in, c.Argument("project").String())
 
 	projectColumns, _, _ := client.Projects.ListProjectColumns(ctx, selectedProject.GetID(), nil)
 	fmt.Println(projectColumns[0].GetID(), projectColumns[0].GetName())
@@ -134,17 +211,53 @@ func CreateItem(c *clif.Command, in clif.Input) {
 	client.Projects.CreateProjectCard(ctx, projectColumns[0].GetID(), &github.ProjectCardOptions{Note: message})
 
 }
+func selectColumn(client *github.Client, in clif.Input, project *github.Project) *github.ProjectColumn {
+	choices := make(map[string]string)
 
-func selectProject(client *github.Client, in clif.Input) *github.Project {
+	columns, _, _ := client.Projects.ListProjectColumns(ctx, project.GetID(), nil)
+	for key, column := range columns {
+		choices[strconv.Itoa(key)] = "<" + column.GetName() + ">"
+	}
+
+	selectedNr, _ := strconv.Atoi(in.Choose("Select column to move the card", choices))
+	return columns[selectedNr]
+}
+
+func selectCard(client *github.Client, in clif.Input, project *github.Project) *github.ProjectCard {
+	choices := make(map[string]string)
+
+	cards := getCards(client, project)
+	for key, card := range cards {
+		choices[strconv.Itoa(key)] = "<" + card.GetColumnName() + "> " + card.GetNote()
+	}
+
+	selectedNr, _ := strconv.Atoi(in.Choose("Select Card to move", choices))
+	return cards[selectedNr]
+}
+
+func selectProject(client *github.Client, in clif.Input, preselectedProject string) *github.Project {
 	choices := make(map[string]string)
 
 	userprojects := getProjects(client)
 	for key, project := range userprojects {
 		choices[strconv.Itoa(key)] = project.GetName()
+		if project.GetName() == preselectedProject {
+			return project
+		}
 	}
 
 	selectedNr, _ := strconv.Atoi(in.Choose("Where do you want to add a task?", choices))
 	return userprojects[selectedNr]
+}
+
+func getProjectByName(client *github.Client, projectname string) *github.Project {
+	userprojects := getProjects(client)
+	for _, project := range userprojects {
+		if project.GetName() == projectname {
+			return project
+		}
+	}
+	return nil
 }
 
 func getProjects(client *github.Client) []*github.Project {
@@ -157,9 +270,10 @@ func getProjects(client *github.Client) []*github.Project {
 
 	if repo != nil {
 		repositorydetails := getRepodetails(repo)
-
-		fmt.Println("Owner: ", repositorydetails.owner)
-		fmt.Println("Repositoryname:", repositorydetails.name)
+		/*
+			fmt.Println("Owner: ", repositorydetails.owner)
+			fmt.Println("Repositoryname:", repositorydetails.name)
+		*/
 		repoprojects, _, _ := client.Repositories.ListProjects(ctx, repositorydetails.owner, repositorydetails.name, nil)
 
 		userprojects = append(userprojects, repoprojects...)

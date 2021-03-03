@@ -11,7 +11,7 @@ func cmdClose() *clif.Command {
 	}
 
 	return clif.NewCommand("close", "Close a project", cb).
-		NewArgument("name", "Name of the project to close", "", false, false)
+		NewArgument("project", "Name of the project to close", "", false, false)
 }
 
 func init() {
