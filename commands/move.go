@@ -14,7 +14,7 @@ func cmdMove() *clif.Command {
 	return clif.NewCommand("move", "Move a card to anoter column", cb).
 		NewArgument("project", "Name of the project", "", false, false).
 		NewOption("card", "c", "Selected cards", "", false, false).
-		NewOption("destinateion", "d", "destination column", "closed", false, false)
+		NewOption("destination", "d", "Destination column", "", false, false)
 }
 
 func init() {

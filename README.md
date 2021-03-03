@@ -34,13 +34,13 @@ You find older releases here : https://github.com/mms-gianni/git-project/release
 
 ### Create your first personl project in your profile
 ```
-git project create -u
+git project open -u
 ```
 
 ### Create a repository related project
 ```
 cd your-project
-git project create 
+git project open 
 ```
 
 ### Add a new task to a project
@@ -75,10 +75,15 @@ git project list
 ```
 
 ```
-git project help create
+git project help open
 ```
 
 ### create a personal list with one shot
 ```
 git project create shoppinglist -p -d "helps me to remember what to buy"
+```
+
+### move a card arround 
+```
+git project move shoppinglist -c milk -d done
 ```

@@ -180,14 +180,15 @@ func MoveCard(c *clif.Command, out clif.Output, in clif.Input) {
 	selectedProject := selectProject(client, in, c.Argument("project").String())
 
 	var selectedCard *github.ProjectCard
+	cards := getCards(client, selectedProject)
 	if c.Option("card").String() == "" {
-		selectedCard = selectCard(client, in, selectedProject)
+		selectedCard = selectCard(cards, in)
+	} else {
+		selectedCard = selectCardByNote(cards, c.Option("card").String())
 	}
 
 	var selectedColumn *github.ProjectColumn
-	if c.Option("card").String() == "" {
-		selectedColumn = selectColumn(client, in, selectedProject)
-	}
+	selectedColumn = selectColumn(client, in, selectedProject, c.Option("destination").String())
 
 	_, err := client.Projects.MoveProjectCard(ctx, selectedCard.GetID(), &github.ProjectCardMoveOptions{Position: "bottom", ColumnID: selectedColumn.GetID()})
 
@@ -213,28 +214,39 @@ func CreateCard(c *clif.Command, in clif.Input, out clif.Output) {
 	}
 
 }
-func selectColumn(client *github.Client, in clif.Input, project *github.Project) *github.ProjectColumn {
+func selectColumn(client *github.Client, in clif.Input, project *github.Project, searchColumn string) *github.ProjectColumn {
 	choices := make(map[string]string)
 
 	columns, _, _ := client.Projects.ListProjectColumns(ctx, project.GetID(), nil)
 	for key, column := range columns {
 		choices[strconv.Itoa(key)] = "<" + column.GetName() + ">"
+		if column.GetName() == searchColumn {
+			return column
+		}
 	}
 
 	selectedNr, _ := strconv.Atoi(in.Choose("Select column to move the card", choices))
 	return columns[selectedNr]
 }
 
-func selectCard(client *github.Client, in clif.Input, project *github.Project) *github.ProjectCard {
+func selectCard(cards []*github.ProjectCard, in clif.Input) *github.ProjectCard {
 	choices := make(map[string]string)
 
-	cards := getCards(client, project)
 	for key, card := range cards {
 		choices[strconv.Itoa(key)] = "<" + card.GetColumnName() + "> " + card.GetNote()
 	}
 
 	selectedNr, _ := strconv.Atoi(in.Choose("Select Card to move", choices))
 	return cards[selectedNr]
+}
+
+func selectCardByNote(cards []*github.ProjectCard, searchedCard string) *github.ProjectCard {
+	for _, card := range cards {
+		if card.GetNote() == searchedCard {
+			return card
+		}
+	}
+	return nil
 }
 
 func selectProject(client *github.Client, in clif.Input, preselectedProject string) *github.Project {
