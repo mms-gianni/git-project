@@ -83,6 +83,11 @@ git project help open
 git project create shoppinglist -p -d "helps me to remember what to buy"
 ```
 
+### Add Milk to your shoppinglist
+```
+git project add shoppinglist milk
+```
+
 ### Move a card arround 
 ```
 git project move shoppinglist -c milk -d done
