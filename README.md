@@ -54,7 +54,7 @@ git project add
 git project status
 ```
 
-### Cleanup all Cards in state "closed"
+### Cleanup all Cards in column "done"
 ```
 git project clean
 ```

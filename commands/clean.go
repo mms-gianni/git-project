@@ -10,7 +10,7 @@ func cmdClean() *clif.Command {
 		githubcommands.Cleanup(c)
 	}
 
-	return clif.NewCommand("clean", "Archive all cards in the 'closed' column", cb)
+	return clif.NewCommand("clean", "Archive all cards in the 'done' column", cb)
 }
 
 func init() {

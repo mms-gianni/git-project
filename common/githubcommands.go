@@ -29,7 +29,7 @@ func Cleanup(c *clif.Command) {
 
 		cards := getCards(client, project)
 		for _, card := range cards {
-			if card.GetColumnName() == "closed" {
+			if card.GetColumnName() == "done" {
 				fmt.Println("Archived", card.GetNote(), "in", project.GetName())
 				archived := true
 				client.Projects.UpdateProjectCard(ctx, card.GetID(), &github.ProjectCardOptions{Archived: &archived})
@@ -77,7 +77,7 @@ func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
 	project, _, projectErr := client.Repositories.CreateProject(ctx, repositorydetails.owner, repositorydetails.name, &github.ProjectOptions{Name: &name, Body: &body, Public: &public})
 	if projectErr == nil {
 		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "open"})
-		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "closed"})
+		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "done"})
 	}
 }
 
@@ -103,20 +103,20 @@ func CreatePersonalProject(c *clif.Command, in clif.Input) {
 		}
 		client.Projects.UpdateProject(ctx, project.GetID(), &github.ProjectOptions{Body: &body, Public: &public})
 		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "open"})
-		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "closed"})
+		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "done"})
 	}
 
 }
 
-func GetItems(c *clif.Command) {
+func GetItems(c *clif.Command, out clif.Output) {
 	client := login(c)
 
 	for _, project := range getProjects(client) {
-		fmt.Println("\n\nList: ", project.GetName(), "("+project.GetState()+")")
-		fmt.Println("--------------------------------------")
+		out.Printf("\n\n<subline>List: " + project.GetName() + "<reset>\n")
 		cards := getCards(client, project)
 		for _, card := range cards {
-			fmt.Println("  <"+card.GetColumnName()+">", " ", card.GetNote())
+			//fmt.Println("  <"+card.GetColumnName()+">", " ", card.GetNote())
+			out.Printf("  <" + card.GetColumnName() + "> " + card.GetNote() + "\n")
 		}
 	}
 }

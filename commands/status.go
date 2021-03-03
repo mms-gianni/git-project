@@ -7,7 +7,7 @@ import (
 
 func cmdStatus() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output) {
-		githubcommands.GetItems(c)
+		githubcommands.GetItems(c, out)
 	}
 
 	return clif.NewCommand("status", "List all projects and cards", cb).
