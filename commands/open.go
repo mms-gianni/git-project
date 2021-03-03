@@ -8,7 +8,7 @@ import (
 
 func cmdOpen() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output, in clif.Input) {
-		githubcommands.OpenProject(c, in)
+		githubcommands.OpenProject(c, in, out)
 	}
 
 	return clif.NewCommand("open", "Open a new project", cb).

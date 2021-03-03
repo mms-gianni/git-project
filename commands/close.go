@@ -7,7 +7,7 @@ import (
 
 func cmdClose() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output, in clif.Input) {
-		githubcommands.CloseProject(c, in)
+		githubcommands.CloseProject(c, in, out)
 	}
 
 	return clif.NewCommand("close", "Close a project", cb).

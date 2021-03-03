@@ -7,7 +7,7 @@ import (
 
 func cmdClean() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output, in clif.Input) {
-		githubcommands.Cleanup(c)
+		githubcommands.Cleanup(c, out)
 	}
 
 	return clif.NewCommand("clean", "Archive all cards in the 'done' column", cb)

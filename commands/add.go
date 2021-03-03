@@ -7,7 +7,7 @@ import (
 
 func cmdAdd() *clif.Command {
 	cb := func(c *clif.Command, out clif.Output, in clif.Input) {
-		githubcommands.CreateCard(c, in)
+		githubcommands.CreateCard(c, in, out)
 	}
 
 	return clif.NewCommand("add", "Add a new card", cb).

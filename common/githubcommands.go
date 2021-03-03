@@ -28,7 +28,7 @@ type CardslistItem struct {
 	project     *github.Project
 }
 
-func Cleanup(c *clif.Command) {
+func Cleanup(c *clif.Command, out clif.Output) {
 	client := login(c)
 
 	for _, project := range getProjects(client) {
@@ -38,32 +38,34 @@ func Cleanup(c *clif.Command) {
 			if card.GetColumnName() == "done" {
 				fmt.Println("Archived", card.GetNote(), "in", project.GetName())
 				archived := true
-				client.Projects.UpdateProjectCard(ctx, card.GetID(), &github.ProjectCardOptions{Archived: &archived})
-
+				_, _, err := client.Projects.UpdateProjectCard(ctx, card.GetID(), &github.ProjectCardOptions{Archived: &archived})
+				if err == nil {
+					out.Printf("\n<success> Archived <" + card.GetNote() + "> in <" + project.GetName() + "> project<reset>\n\n")
+				}
 			}
 		}
 
 	}
 }
 
-func CloseProject(c *clif.Command, in clif.Input) {
+func CloseProject(c *clif.Command, in clif.Input, out clif.Output) {
 	client := login(c)
 
 	selectedProject := selectProject(client, in, c.Argument("project").String())
-	/*
-		if c.Argument("name").String() == "" {
-			selectedProject = selectProject(client, in)
-		}
-	*/
 
 	state := "closed"
-	client.Projects.UpdateProject(ctx, selectedProject.GetID(), &github.ProjectOptions{State: &state})
+	project, _, err := client.Projects.UpdateProject(ctx, selectedProject.GetID(), &github.ProjectOptions{State: &state})
+
+	if err == nil {
+		out.Printf("\n<success> project <" + project.GetName() + "> has been sucessfully closed<reset>\n\n")
+	}
 }
-func OpenProject(c *clif.Command, in clif.Input) {
+
+func OpenProject(c *clif.Command, in clif.Input, out clif.Output) {
 	_, repo := GetGitdir()
 
 	if repo == nil {
-		OpenPersonalProject(c, in)
+		OpenPersonalProject(c, in, out)
 	} else {
 		space := "2"
 
@@ -77,21 +79,18 @@ func OpenProject(c *clif.Command, in clif.Input) {
 			})
 		}
 		if space == "1" {
-			OpenPersonalProject(c, in)
+			OpenPersonalProject(c, in, out)
 		} else {
-			OpenRepoProject(c, in, repo)
+			OpenRepoProject(c, in, out, repo)
 		}
 	}
 }
 
-func OpenRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
+func OpenRepoProject(c *clif.Command, in clif.Input, out clif.Output, repo *git.Repository) {
 	client := login(c)
 
 	repositorydetails := getRepodetails(repo)
-	/*
-		fmt.Println("Owner: ", repositorydetails.owner)
-		fmt.Println("Repositoryname:", repositorydetails.name)
-	*/
+
 	name := ""
 	if c.Argument("project").String() != "" {
 		name = c.Argument("project").String()
@@ -108,12 +107,15 @@ func OpenRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
 	}
 	project, _, projectErr := client.Repositories.CreateProject(ctx, repositorydetails.owner, repositorydetails.name, &github.ProjectOptions{Name: &name, Body: &body, Public: &public})
 	if projectErr == nil {
-		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "open"})
-		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "done"})
+		_, _, openColumnErr := client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "open"})
+		_, _, doneColumnErr := client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "done"})
+		if projectErr == nil && openColumnErr == nil && doneColumnErr == nil {
+			out.Printf("\n<success> project <" + project.GetName() + "> has been sucessfully opened<reset>\n\n")
+		}
 	}
 }
 
-func OpenPersonalProject(c *clif.Command, in clif.Input) {
+func OpenPersonalProject(c *clif.Command, in clif.Input, out clif.Output) {
 	client := login(c)
 
 	name := ""
@@ -134,8 +136,11 @@ func OpenPersonalProject(c *clif.Command, in clif.Input) {
 			public = true
 		}
 		client.Projects.UpdateProject(ctx, project.GetID(), &github.ProjectOptions{Body: &body, Public: &public})
-		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "open"})
-		client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "done"})
+		_, _, openColumnErr := client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "open"})
+		_, _, doneColumnErr := client.Projects.CreateProjectColumn(ctx, project.GetID(), &github.ProjectColumnOptions{Name: "done"})
+		if projectErr == nil && openColumnErr == nil && doneColumnErr == nil {
+			out.Printf("\n<success> project <" + project.GetName() + "> has been sucessfully opened<reset>\n\n")
+		}
 	}
 
 }
@@ -156,7 +161,6 @@ func GetStatus(c *clif.Command, out clif.Output) []CardslistItem {
 		cards := getCards(client, project)
 		out.Printf("\n<subline>List: " + project.GetName() + "<reset>\n")
 		for _, card := range cards {
-			//fmt.Println("  <"+card.GetColumnName()+">", " ", card.GetNote())
 			out.Printf(strconv.Itoa(item) + "|  <" + card.GetColumnName() + ">  " + card.GetNote() + "\n")
 			cardslist = append(cardslist, CardslistItem{
 				id:          item,
@@ -174,11 +178,6 @@ func MoveCard(c *clif.Command, out clif.Output, in clif.Input) {
 	client := login(c)
 
 	selectedProject := selectProject(client, in, c.Argument("project").String())
-	/*
-		if c.Argument("project").String() == "" {
-			selectedProject = selectProject(client, in)
-		}
-	*/
 
 	var selectedCard *github.ProjectCard
 	if c.Option("card").String() == "" {
@@ -198,17 +197,20 @@ func MoveCard(c *clif.Command, out clif.Output, in clif.Input) {
 
 }
 
-func CreateCard(c *clif.Command, in clif.Input) {
+func CreateCard(c *clif.Command, in clif.Input, out clif.Output) {
 	client := login(c)
 
 	selectedProject := selectProject(client, in, c.Argument("project").String())
 
 	projectColumns, _, _ := client.Projects.ListProjectColumns(ctx, selectedProject.GetID(), nil)
-	fmt.Println(projectColumns[0].GetID(), projectColumns[0].GetName())
 
 	message := in.Ask("What is the task", nil)
-	fmt.Println(message)
-	client.Projects.CreateProjectCard(ctx, projectColumns[0].GetID(), &github.ProjectCardOptions{Note: message})
+
+	card, _, cardErr := client.Projects.CreateProjectCard(ctx, projectColumns[0].GetID(), &github.ProjectCardOptions{Note: message})
+
+	if cardErr == nil {
+		out.Printf("\n<success> added Card <" + card.GetNote() + "> sucessfully to <" + selectedProject.GetName() + "> project<reset>\n\n")
+	}
 
 }
 func selectColumn(client *github.Client, in clif.Input, project *github.Project) *github.ProjectColumn {
@@ -270,10 +272,7 @@ func getProjects(client *github.Client) []*github.Project {
 
 	if repo != nil {
 		repositorydetails := getRepodetails(repo)
-		/*
-			fmt.Println("Owner: ", repositorydetails.owner)
-			fmt.Println("Repositoryname:", repositorydetails.name)
-		*/
+
 		repoprojects, _, _ := client.Repositories.ListProjects(ctx, repositorydetails.owner, repositorydetails.name, nil)
 
 		userprojects = append(userprojects, repoprojects...)
@@ -288,7 +287,6 @@ func getCards(client *github.Client, project *github.Project) []*github.ProjectC
 	projectColumns, _, _ := client.Projects.ListProjectColumns(ctx, project.GetID(), nil)
 
 	for _, column := range projectColumns {
-		// fmt.Println(column.GetName())
 		cards, _, _ := client.Projects.ListProjectCards(ctx, column.GetID(), nil)
 
 		for _, card := range cards {
