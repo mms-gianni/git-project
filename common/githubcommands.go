@@ -59,11 +59,11 @@ func CloseProject(c *clif.Command, in clif.Input) {
 	state := "closed"
 	client.Projects.UpdateProject(ctx, selectedProject.GetID(), &github.ProjectOptions{State: &state})
 }
-func CreateProject(c *clif.Command, in clif.Input) {
+func OpenProject(c *clif.Command, in clif.Input) {
 	_, repo := GetGitdir()
 
 	if repo == nil {
-		CreatePersonalProject(c, in)
+		OpenPersonalProject(c, in)
 	} else {
 		space := "2"
 
@@ -77,14 +77,14 @@ func CreateProject(c *clif.Command, in clif.Input) {
 			})
 		}
 		if space == "1" {
-			CreatePersonalProject(c, in)
+			OpenPersonalProject(c, in)
 		} else {
-			CreateRepoProject(c, in, repo)
+			OpenRepoProject(c, in, repo)
 		}
 	}
 }
 
-func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
+func OpenRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
 	client := login(c)
 
 	repositorydetails := getRepodetails(repo)
@@ -113,7 +113,7 @@ func CreateRepoProject(c *clif.Command, in clif.Input, repo *git.Repository) {
 	}
 }
 
-func CreatePersonalProject(c *clif.Command, in clif.Input) {
+func OpenPersonalProject(c *clif.Command, in clif.Input) {
 	client := login(c)
 
 	name := ""
