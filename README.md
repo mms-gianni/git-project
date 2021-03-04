@@ -113,3 +113,4 @@ git project move shoppinglist -c milk -d done
 ```
 git project board wg-k8s-infra -o kubernetes
 ``` 
+![Screenshot](docs/img/screenshot2.png?raw=true "Screenshot")
