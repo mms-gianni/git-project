@@ -11,6 +11,8 @@ Manage your github projects with your git cli
 - manage your projects where you work
 - use it as your personal todo list
 
+![Screenshot](docs/img/screenshot.png?raw=true "Screenshot")
+
 ## Installation
 Generate a token here : https://github.com/settings/tokens (You need to be loged in)
 
