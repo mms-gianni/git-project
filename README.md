@@ -21,6 +21,7 @@ To export the Github username is optional. But it requred to access your persona
 ```
 echo 'export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"' >> ~/.zshrc
 echo 'export GITHUB_USERNAME="change-me-to-your-username"' >> ~/.zshrc
+echo 'export GITHUB_ORGANISATIONS="klustair,kubernetes"' >> ~/.zshrc
 curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cmd/git-project/git-project.mac.64bit -o /usr/local/bin/git-project
 chmod +x /usr/local/bin/git-project
 ```
@@ -29,14 +30,13 @@ chmod +x /usr/local/bin/git-project
 ```
 echo 'export GITHUB_TOKEN="asdfasdfasdfasdfasdfasdfasdfasdfasdf"' >> ~/.bashrc
 echo 'export GITHUB_USERNAME="change-me-to-your-username"' >> ~/.bashrc
+echo 'export GITHUB_ORGANISATIONS="klustair,kubernetes"' >> ~/.bashrc
 curl https://raw.githubusercontent.com/mms-gianni/git-project/master/cmd/git-project/git-project.linux.64bit -o /usr/local/bin/git-project
 chmod +x /usr/local/bin/git-project
 ```
 
 ### Windows
 It works also on Windows. But since i have no windows in my basement, I have no idea how to install it (Help welcome :D )
-
-You find older releases here : https://github.com/mms-gianni/git-project/releases
 
 ## Quick start
 
@@ -75,7 +75,7 @@ git project board
 git project move
 ```
 
-### Cleanup all Cards in column "done"
+### Cleanup all cards in column "done"
 ```
 git project clean
 ```
@@ -98,7 +98,7 @@ git project help open
 git project create shoppinglist -p -d "helps me to remember what to buy"
 ```
 
-### Add Milk to your shoppinglist
+### Add milk to your shoppinglist
 ```
 git project add shoppinglist milk
 ```
@@ -107,3 +107,9 @@ git project add shoppinglist milk
 ```
 git project move shoppinglist -c milk -d done
 ```
+
+## Want to see a complex Board in action? 
+
+```
+git project board wg-k8s-infra -o kubernetes
+``` 
