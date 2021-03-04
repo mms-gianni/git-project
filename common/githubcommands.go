@@ -3,12 +3,14 @@ package common
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/google/go-github/v33/github"
+	"github.com/olekukonko/tablewriter"
 	"golang.org/x/oauth2"
 	"gopkg.in/ukautz/clif.v1"
 )
@@ -35,7 +37,7 @@ func Cleanup(c *clif.Command, out clif.Output) {
 
 	for _, project := range getProjects(client, c.Option("username").String(), c.Option("organisations").String()) {
 
-		cards := getCards(client, project)
+		cards, _ := getCards(client, project)
 		for _, card := range cards {
 			if card.GetColumnName() == "done" {
 				fmt.Println("Archived", card.GetNote(), "in", project.GetName())
@@ -160,7 +162,7 @@ func GetStatus(c *clif.Command, out clif.Output) []CardslistItem {
 	item := 0
 	var cardslist []CardslistItem
 	for _, project := range projectslist {
-		cards := getCards(client, project)
+		cards, _ := getCards(client, project)
 		out.Printf("\n<subline>Project: " + project.GetName() + "<reset>\n")
 		for _, card := range cards {
 			title := ""
@@ -184,6 +186,70 @@ func GetStatus(c *clif.Command, out clif.Output) []CardslistItem {
 	return cardslist
 }
 
+func GetBoard(c *clif.Command, out clif.Output) {
+	client := login(c)
+
+	var projectslist []*github.Project
+	if c.Argument("project").String() == "" {
+		projectslist = getProjects(client, c.Option("username").String(), c.Option("organisations").String())
+	} else {
+		projectslist = append(projectslist, getProjectByName(client, c.Argument("project").String(), c.Option("username").String(), c.Option("organisations").String()))
+	}
+
+	for _, project := range projectslist {
+		out.Printf("\n\n<important> Project: " + project.GetName() + " <reset>\n")
+
+		projectColumns, _, _ := client.Projects.ListProjectColumns(ctx, project.GetID(), nil)
+
+		headers := []string{}
+		columnCardsList := [][]*github.ProjectCard{}
+
+		max := 0
+		for _, column := range projectColumns {
+			headers = append(headers, column.GetName())
+			cards, _, _ := client.Projects.ListProjectCards(ctx, column.GetID(), nil)
+			columnCardsList = append(columnCardsList, cards)
+			if len(cards) > max {
+				max = len(cards)
+			}
+		}
+
+		ntable := tablewriter.NewWriter(os.Stdout)
+		ntable.SetHeader(headers)
+		ntable.SetAutoMergeCells(true)
+		ntable.SetRowLine(true)
+
+		//fmt.Println("coumns", len(columnCardsList))
+
+		for row := 0; row < max; row++ {
+			//fmt.Println("row", row)
+			var cellcontent = []string{}
+			for cell := 0; cell < len(columnCardsList); cell++ {
+				//fmt.Println("cell", cell, len(columnCardsList[cell]))
+
+				if row < len(columnCardsList[cell]) {
+					//fmt.Println(columnCardsList[cell][row].GetNote())
+
+					title := ""
+					if columnCardsList[cell][row].GetContentURL() != "" {
+						issue := getIssueDetails(c, columnCardsList[cell][row].GetContentURL())
+						title = "Issue #" + strconv.Itoa(issue.GetNumber()) + " : " + issue.GetTitle()
+					} else {
+						title = columnCardsList[cell][row].GetNote()
+					}
+
+					cellcontent = append(cellcontent, title)
+				} else {
+					//fmt.Println("-")
+					cellcontent = append(cellcontent, ".")
+				}
+			}
+			ntable.Append(cellcontent)
+		}
+		ntable.Render()
+	}
+}
+
 func getIssueDetails(c *clif.Command, issueURL string) *github.Issue {
 	client := login(c)
 
@@ -202,7 +268,7 @@ func MoveCard(c *clif.Command, out clif.Output, in clif.Input) {
 	selectedProject := selectProject(client, in, c.Argument("project").String(), c.Option("username").String(), c.Option("organisations").String())
 
 	var selectedCard *github.ProjectCard
-	cards := getCards(client, selectedProject)
+	cards, _ := getCards(client, selectedProject)
 	if c.Option("card").String() == "" {
 		selectedCard = selectCard(cards, in)
 	} else {
@@ -325,7 +391,7 @@ func getProjects(client *github.Client, username string, organisations string) [
 	return userprojects
 }
 
-func getCards(client *github.Client, project *github.Project) []*github.ProjectCard {
+func getCards(client *github.Client, project *github.Project) ([]*github.ProjectCard, []*github.ProjectColumn) {
 	var cardslist []*github.ProjectCard
 
 	projectColumns, _, _ := client.Projects.ListProjectColumns(ctx, project.GetID(), nil)
@@ -339,5 +405,5 @@ func getCards(client *github.Client, project *github.Project) []*github.ProjectC
 		}
 	}
 
-	return cardslist
+	return cardslist, projectColumns
 }

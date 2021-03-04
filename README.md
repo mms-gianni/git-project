@@ -39,6 +39,7 @@ You find older releases here : https://github.com/mms-gianni/git-project/release
 ## Quick start
 
 ### Create your first personl project in your profile
+Open creates a new project. 2 columns are added by default (open, done). Feel free to change them or add more.
 ```
 git project open -U
 ```
