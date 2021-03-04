@@ -62,6 +62,12 @@ git project add
 git project status
 ```
 
+### Display project boards
+
+```
+git project board
+```
+
 ### Move a card to another column
 ```
 git project move

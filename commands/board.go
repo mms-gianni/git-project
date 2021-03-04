@@ -10,7 +10,7 @@ func cmdBoard() *clif.Command {
 		githubcommands.GetBoard(c, out)
 	}
 
-	return clif.NewCommand("board", "List projects and cards", cb).
+	return clif.NewCommand("board", "Display project boards", cb).
 		NewArgument("project", "Show only this project", "", false, false)
 }
 
