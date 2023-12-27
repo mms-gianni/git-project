@@ -3,7 +3,7 @@ module github.com/mms-gianni/git-project
 go 1.15
 
 require (
-	github.com/go-git/go-git/v5 v5.2.0
+	github.com/go-git/go-git/v5 v5.11.0
 	github.com/google/go-github/v33 v33.0.0
 	github.com/gosuri/uilive v0.0.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
